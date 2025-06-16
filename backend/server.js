@@ -159,5 +159,7 @@ cron.schedule("*/8 * * * *", async () => {
     console.error("Error accessing the dummy route:", error.message);
   }
 });
-
-module.exports = app;
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
