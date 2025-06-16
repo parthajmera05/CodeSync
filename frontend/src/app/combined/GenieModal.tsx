@@ -228,7 +228,7 @@ export default function GenieModal({ onClose, code = "" }: any) {
                   {response}
                 </ReactMarkdown>
               ) : (
-                <p className="text-zinc-400 text-sm">Genie’s answer will appear here...</p>
+                <p className="text-zinc-400 text-sm">AI answer will appear here...</p>
               )}
             </div>
 
