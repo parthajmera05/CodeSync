@@ -367,62 +367,57 @@ export default function CollaborativeIDE({ userName }: any) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      {!isJoined ? (
-        <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-4">
-          
-         
-            
-          
-          <div className="space-y-4 w-[90vw] lg:w-fit md:w-fit">
-            <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                className="border w-full p-2 rounded-lg"
-              />
-              <button
-                onClick={createRoom}
-                
-                className="w-full bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Create New Room
-              </button>
-            </div>
-            <div className="flex flex-col lg:flex-row gap-2">
-              <input
-                type="text"
-                value={roomId}
-                onChange={(e) => setRoomId(e.target.value)}
-                placeholder="Enter Room ID"
-                className="border p-2 rounded-lg"
-              />
-              <button
-                onClick={() => joinRoomClicked(roomId as string)}
-                
-                className="bg-green-500 text-white w-full px-6 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Join Room
-              </button>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-red-900 via-gray-900 to-orange-900 text-white font-sans">
+    {!isJoined ? (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-4">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-orange-400 text-transparent bg-clip-text">
+          Welcome to CodeSync
+        </h1>
+        <div className="space-y-4 w-[90vw] lg:w-fit md:w-fit">
+          <div className="flex flex-col gap-2">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              className="border w-full p-2 rounded-lg bg-white text-black"
+            />
+            <button
+              onClick={createRoom}
+              className="w-full bg-gradient-to-r from-primary to-secondary text-white px-6 py-2 rounded-lg"
+            >
+              Create New Room
+            </button>
+          </div>
+          <div className="flex flex-col lg:flex-row gap-2">
+            <input
+              type="text"
+              value={roomId}
+              onChange={(e) => setRoomId(e.target.value)}
+              placeholder="Enter Room ID"
+              className="border p-2 rounded-lg bg-white text-black"
+            />
+            <button
+              onClick={() => joinRoomClicked(roomId)}
+              className="bg-green-500 text-white w-full px-6 py-2 rounded-lg"
+            >
+              Join Room
+            </button>
           </div>
         </div>
+      </div>
       ) : (
         <div className="container mx-auto p-4">
-          {socketRef.current && (
-            <ChatModal socket={socketRef.current} userName={name} />
-          )}
+          
           {/* Top bar with room info and controls */}
           <div className="mb-4 lg:flex justify-between items-center">
             <div className="flex justify-between items-center mr-2 space-x-2 text-white bg-gray-800 px-4 py-2 rounded-lg shadow-lg">
               <div className="flex gap-2">
                 <span className="font-sm lg:font-medium">Room ID:</span>
-                <span className="text-blue-400 hidden lg:block font-semibold">
+                <span className="text-red-400 hidden lg:block font-semibold">
                   {roomId}
                 </span>
-                <span className="text-blue-400 block lg:hidden font-semibold">
+                <span className="text-red-400 block lg:hidden font-semibold">
                   {roomId.slice(0, 4)}...
                 </span>
               </div>
@@ -430,7 +425,7 @@ export default function CollaborativeIDE({ userName }: any) {
                 <span
                   onClick={() => copyToClipboard(roomId, setCopied)}
                   className={`ml-2 p-2 rounded-full cursor-pointer transition ${
-                    copied ? "bg-green-500" : "bg-blue-500 hover:bg-blue-600"
+                    copied ? "bg-red-500" : "bg-orange-500 hover:bg-orange-600"
                   }`}
                   title={copied ? "Copied!" : "Copy Room ID"}
                 >
@@ -444,8 +439,8 @@ export default function CollaborativeIDE({ userName }: any) {
                   onClick={() => copyMeetLink(roomId, setMeetLinkCopied)}
                   className={`ml-2 p-2 rounded-full cursor-pointer transition ${
                     meetlinkcopied
-                      ? "bg-green-500"
-                      : "bg-blue-500 hover:bg-blue-600"
+                      ? "bg-red-500"
+                      : "bg-orange-500 hover:bg-orange-600"
                   }`}
                   title={meetlinkcopied ? "Copied!" : "Copy Meet Link"}
                 >
@@ -469,7 +464,7 @@ export default function CollaborativeIDE({ userName }: any) {
               </button>
               <button
                 onClick={downloadCodeAsFile.bind(null, code, language.value)}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white"
               >
                 Download File
               </button>
@@ -479,7 +474,7 @@ export default function CollaborativeIDE({ userName }: any) {
                   code,
                   "codehive_snippet.png"
                 )}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white"
               >
                 Download Snippet (PNG)
               </button>
@@ -495,7 +490,7 @@ export default function CollaborativeIDE({ userName }: any) {
               </button>
               <button
                 onClick={downloadCodeAsFile.bind(null, code, language.value)}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white"
               >
                 <MdFileDownload />
               </button>
@@ -505,7 +500,7 @@ export default function CollaborativeIDE({ userName }: any) {
                   code,
                   "codehive_snippet.png"
                 )}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+                  className="px-4 py-2 rounded-lg bg-orange-500 text-white"
               >
                 <AiOutlineSnippets />
               </button>
@@ -513,11 +508,29 @@ export default function CollaborativeIDE({ userName }: any) {
           </div>
           {/* Main content area */}
           <div className="flex lg:flex-row flex-col gap-4">
-            {/* Left side - Videos */}
-            <div className="w-full lg:w-1/4 flex flex-col gap-2">
-              
-              
+            
+            {/* Inline chat for large screens */}
+            <div className="hidden lg:block">
+            {socketRef.current && (
+                <ChatModal
+                  socket={socketRef.current}
+                  userName={name}
+                  forceInline={true} 
+                />
+              )}
             </div>
+
+            {/* Floating chat for small screens */}
+            <div className="lg:hidden">
+            {socketRef.current && (
+                <ChatModal
+                  socket={socketRef.current}
+                  userName={name}
+                  forceInline={false} 
+                />
+              )}
+            </div>
+
             {/* Right side - Code Editor */}
             <div className="w-full lg:w-3/4 space-y-4">
               <div className="flex justify-between items-center">
@@ -529,10 +542,10 @@ export default function CollaborativeIDE({ userName }: any) {
                   />
                   <button
                     onClick={toggleGenieModal}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center gap-2"
                   >
                     <RiRobot2Line />
-                    <span>Genie</span>
+                    <span>Ask AI</span>
                   </button>
                 </div>
                 {isGenieModalOpen && <GenieModal onClose={toggleGenieModal} code={code} />}
@@ -542,7 +555,7 @@ export default function CollaborativeIDE({ userName }: any) {
                     type="number"
                     value={fontSize}
                     onChange={(e) => setFontSize(Number(e.target.value))}
-                    className="w-12 px-2 py-1 rounded"
+                    className="w-12 px-2 py-1 rounded bg-gray-800 text-white"
                     min="10"
                     max="40"
                   />
@@ -570,7 +583,7 @@ export default function CollaborativeIDE({ userName }: any) {
                     onClick={toggleGenieModal}
                     className="px-4 w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                   >
-                    Generate Code with Genie
+                    Generate Code with AI
                   </button>
                   {isGenieModalOpen && (
                     <GenieModal onClose={toggleGenieModal} />

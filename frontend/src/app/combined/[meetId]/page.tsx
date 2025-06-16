@@ -453,18 +453,16 @@ export default function CollaborativeIDE2({ userName }: any)  {
         </div>
       ) : (
         <div className="container mx-auto p-4">
-          {socketRef.current && (
-            <ChatModal socket={socketRef.current} userName={name} />
-          )}
+          
           {/* Top bar with room info and controls */}
           <div className="mb-4 lg:flex justify-between items-center">
             <div className="flex justify-between items-center mr-2 space-x-2 text-white bg-gray-800 px-4 py-2 rounded-lg shadow-lg">
               <div className="flex gap-2">
                 <span className="font-sm lg:font-medium">Room ID:</span>
-                <span className="text-blue-400 hidden lg:block font-semibold">
+                <span className="text-red-400 hidden lg:block font-semibold">
                   {roomId}
                 </span>
-                <span className="text-blue-400 block lg:hidden font-semibold">
+                <span className="text-red-400 block lg:hidden font-semibold">
                   {roomId.slice(0, 4)}...
                 </span>
               </div>
@@ -472,7 +470,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
                 <span
                   onClick={() => copyToClipboard(roomId as string, setCopied)}
                   className={`ml-2 p-2 rounded-full cursor-pointer transition ${
-                    copied ? "bg-green-500" : "bg-blue-500 hover:bg-blue-600"
+                    copied ? "bg-red-500" : "bg-orange-500 hover:bg-orange-600"
                   }`}
                   title={copied ? "Copied!" : "Copy Room ID"}
                 >
@@ -486,8 +484,8 @@ export default function CollaborativeIDE2({ userName }: any)  {
                   onClick={() => copyMeetLink(roomId as string, setMeetLinkCopied)}
                   className={`ml-2 p-2 rounded-full cursor-pointer transition ${
                     meetlinkcopied
-                      ? "bg-green-500"
-                      : "bg-blue-500 hover:bg-blue-600"
+                      ? "bg-red-500"
+                      : "bg-orange-500 hover:bg-orange-600"
                   }`}
                   title={meetlinkcopied ? "Copied!" : "Copy Meet Link"}
                 >
@@ -501,6 +499,8 @@ export default function CollaborativeIDE2({ userName }: any)  {
             </div>
 
             <div className="hidden lg:flex gap-2">
+              
+              
               <button
                 onClick={leaveRoom}
                 className="px-4 py-2 rounded-lg bg-red-500 text-white"
@@ -509,7 +509,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
               </button>
               <button
                 onClick={downloadCodeAsFile.bind(null, code, language.value)}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white"
               >
                 Download File
               </button>
@@ -519,12 +519,13 @@ export default function CollaborativeIDE2({ userName }: any)  {
                   code,
                   "codehive_snippet.png"
                 )}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white"
               >
                 Download Snippet (PNG)
               </button>
             </div>
             <div className="flex items-center justify-center mt-2 lg:hidden gap-2">
+              
               
               <button
                 onClick={leaveRoom}
@@ -534,7 +535,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
               </button>
               <button
                 onClick={downloadCodeAsFile.bind(null, code, language.value)}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white"
               >
                 <MdFileDownload />
               </button>
@@ -544,7 +545,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
                   code,
                   "codehive_snippet.png"
                 )}
-                className="px-4 py-2 rounded-lg bg-blue-500 text-white"
+                  className="px-4 py-2 rounded-lg bg-orange-500 text-white"
               >
                 <AiOutlineSnippets />
               </button>
@@ -552,11 +553,29 @@ export default function CollaborativeIDE2({ userName }: any)  {
           </div>
           {/* Main content area */}
           <div className="flex lg:flex-row flex-col gap-4">
-            {/* Left side - Videos */}
-            <div className="w-full lg:w-1/4 flex flex-col gap-2">
-              {/* Self video */}
-              
+            
+            {/* Inline chat for large screens */}
+            <div className="hidden lg:block">
+            {socketRef.current && (
+                <ChatModal
+                  socket={socketRef.current}
+                  userName={name}
+                  forceInline={true} 
+                />
+              )}
             </div>
+
+            {/* Floating chat for small screens */}
+            <div className="lg:hidden">
+            {socketRef.current && (
+                <ChatModal
+                  socket={socketRef.current}
+                  userName={name}
+                  forceInline={false} 
+                />
+              )}
+            </div>
+
             {/* Right side - Code Editor */}
             <div className="w-full lg:w-3/4 space-y-4">
               <div className="flex justify-between items-center">
@@ -568,10 +587,10 @@ export default function CollaborativeIDE2({ userName }: any)  {
                   />
                   <button
                     onClick={toggleGenieModal}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                    className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center gap-2"
                   >
                     <RiRobot2Line />
-                    <span>Genie</span>
+                    <span>Ask AI</span>
                   </button>
                 </div>
                 {isGenieModalOpen && <GenieModal onClose={toggleGenieModal} code={code} />}
@@ -581,7 +600,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
                     type="number"
                     value={fontSize}
                     onChange={(e) => setFontSize(Number(e.target.value))}
-                    className="w-12 px-2 py-1 rounded"
+                    className="w-12 px-2 py-1 rounded bg-gray-800 text-white"
                     min="10"
                     max="40"
                   />
@@ -609,7 +628,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
                     onClick={toggleGenieModal}
                     className="px-4 w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                   >
-                    Generate Code with Genie
+                    Generate Code with AI
                   </button>
                   {isGenieModalOpen && (
                     <GenieModal onClose={toggleGenieModal} />
@@ -660,4 +679,5 @@ export default function CollaborativeIDE2({ userName }: any)  {
     </div>
   );
 }
+
 

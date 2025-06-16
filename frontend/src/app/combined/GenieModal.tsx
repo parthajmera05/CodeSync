@@ -20,12 +20,7 @@ interface ExtraProps {
   children: React.ReactNode;
 }
 
-const CodeBlock = ({
-  inline,
-  className,
-  children,
-  ...props
-}: ExtraProps) => {
+const CodeBlock = ({ inline, className, children, ...props }: ExtraProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const match = /language-(\w+)/.exec(className || "");
   const language = match ? match[1] : "plaintext";
@@ -42,28 +37,19 @@ const CodeBlock = ({
 
   return !inline && match ? (
     <div className="relative group">
-      {/* Floating Controls */}
       <div className="absolute top-2 right-2 flex space-x-2 z-10">
-        {/* Language Tag */}
-        <div className="bg-gray-800 text-gray-200 text-xs font-bold px-2 py-1 rounded-md">
+        <div className="bg-gray-900 text-gray-200 text-xs font-bold px-2 py-1 rounded-md">
           {language.toUpperCase()}
         </div>
-
-        {/* Copy Button */}
         <button
           onClick={copyToClipboard}
-          className="p-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-600 transition-all"
+          className="p-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 transition-all"
           aria-label="Copy code"
         >
-          {isCopied ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <Copy className="w-4 h-4" />
-          )}
+          {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
         </button>
       </div>
 
-      {/* Syntax Highlighter */}
       <SyntaxHighlighter
         style={materialDark}
         language={language}
@@ -80,12 +66,7 @@ const CodeBlock = ({
   );
 };
 
-interface GenieModalProps {
-  onClose: () => void;
-  code?: string; // Optional code prop
-}
-
-export default function GenieModal({ onClose, code = "" }:any)  {
+export default function GenieModal({ onClose, code = "" }: any) {
   const [query, setQuery] = useState("");
   const [includeCode, setIncludeCode] = useState(false);
   const [response, setResponse] = useState("");
@@ -107,7 +88,6 @@ export default function GenieModal({ onClose, code = "" }:any)  {
     setLoading(true);
     setError("");
     setResponse("");
-    console.log("Code:", code);
     stopSignalRef.current = false;
 
     const formattedQuery =
@@ -115,8 +95,7 @@ export default function GenieModal({ onClose, code = "" }:any)  {
 
     try {
       const AUTH_SECRET = process.env.NEXT_PUBLIC_AUTH_SECRET;
-      const GENIE_API_URL =
-        process.env.NEXT_PUBLIC_GENIE_API_URL;
+      const GENIE_API_URL = process.env.NEXT_PUBLIC_GENIE_API_URL;
 
       const response = await fetch(GENIE_API_URL!, {
         method: "POST",
@@ -165,121 +144,103 @@ export default function GenieModal({ onClose, code = "" }:any)  {
   }, [response]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/80 transition-opacity duration-300"
-        onClick={onClose}
-      />
-      <div className="relative w-full max-w-3xl sm:max-w-4xl md:max-w-5xl mx-4 h-[90vh] md:h-[85vh] bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
-        {/* Header */}
-        <div className="absolute top-0 left-0 right-0 px-4 sm:px-6 py-4 bg-gray-800 border-b border-gray-700">
-          <div className="flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
+
+      <div className="relative w-full max-w-6xl h-[90vh] mx-2 sm:mx-4 bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-700 overflow-hidden flex flex-col">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 z-10"
+        >
+          <X className="w-5 h-5 text-zinc-400" />
+        </button>
+
+        {/* Responsive Layout: column on mobile, row on desktop */}
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+          {/* LEFT PANEL: Genie Chat Input */}
+          <div className="w-full md:w-[40%] border-b md:border-b-0 md:border-r border-zinc-700 p-4 sm:p-6 flex flex-col gap-4 bg-zinc-800 overflow-auto">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-blue-400" />
-              <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-100">
-                CodeSync Genie
-              </h2>
+              <Sparkles className="text-orange-400 w-5 h-5" />
+              <h2 className="text-lg font-semibold text-white">CodeSync AI Assistant</h2>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-              aria-label="Close modal"
-            >
-              <X className="w-5 h-5 text-gray-400" />
-            </button>
-          </div>
-        </div>
 
-        <div className="h-full pt-20 pb-24 px-4 sm:px-6 overflow-y-auto">
-          <div
-            ref={responseRef}
-            className="min-h-[200px] max-h-[50vh] mb-6 p-6 bg-gray-800 rounded-xl border border-gray-700 shadow-sm overflow-y-auto text-gray-300"
-          >
-            {response ? (
-              <ReactMarkdown
-                components={{
-                  code: ({ inline, className, children, ...props }: any) => (
-                    <CodeBlock inline={inline} className={className} {...props}>
-                      {children}
-                    </CodeBlock>
-                  ),
-                }}
-              >
-                {response}
-              </ReactMarkdown>
-            ) : (
-              <span className="text-gray-400 font-sans">
-                Ask me anything about coding. I'm here to help! ✨
-              </span>
-            )}
-          </div>
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-900 border border-red-700 rounded-xl text-red-300">
-              <p className="text-center">{error}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Input Area */}
-        {/* Input Area */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gray-800 border-t border-gray-700">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Textarea */}
             <textarea
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask me anything about coding..."
-              className="flex-1 p-4 h-24 sm:h-16 bg-gray-700 border border-gray-600 rounded-xl text-gray-100 placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="Describe your issue or question..."
+              className="flex-1 min-h-[180px] sm:min-h-[200px] p-4 rounded-lg bg-zinc-700 text-white border border-zinc-600 resize-none focus:ring-2 focus:ring-orange-500 outline-none"
             />
 
-            {/* Options and Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-2">
-              <label className="flex items-center gap-2 text-gray-300 sm:ml-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <label className="flex items-center gap-2 text-sm text-zinc-300">
                 <input
                   type="checkbox"
                   checked={includeCode}
                   onChange={(e) => setIncludeCode(e.target.checked)}
-                  className="w-4 h-4"
+                  className="accent-orange-500"
                 />
-                Include Code
+                Include code
               </label>
 
-              {/* Pause Button */}
-              {loading && (
-                <button
-                  onClick={handleStopGeneration}
-                  className="py-2 px-4 sm:px-6 bg-red-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-                >
-                  <PauseCircle className="w-6 h-6" />
-                </button>
-              )}
-
-              {/* Send Button */}
-              <button
-                onClick={handleQuerySubmit}
-                disabled={loading || !query.trim()}
-                className="py-3 px-6 sm:px-8 w-full sm:w-auto bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span className="hidden sm:inline">Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-5 h-5" />
-                    <span className="hidden sm:inline">Ask Genie</span>
-                  </>
+              <div className="flex gap-2">
+                {loading && (
+                  <button
+                    onClick={handleStopGeneration}
+                    className="flex-1 sm:flex-none flex items-center gap-1 px-4 py-2 bg-red-600 text-white rounded-md hover:opacity-90"
+                  >
+                    <PauseCircle className="w-4 h-4" />
+                    Stop
+                  </button>
                 )}
-              </button>
+
+                <button
+                  onClick={handleQuerySubmit}
+                  disabled={loading || !query.trim()}
+                  className="flex-1 sm:flex-none flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium rounded-md hover:opacity-90 disabled:opacity-50"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Thinking...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Ask AI
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* RIGHT PANEL: Output Viewer */}
+          <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-zinc-900 text-white">
+            <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 sm:p-6 min-h-[200px]">
+              {response ? (
+                <ReactMarkdown
+                  components={{
+                    code: CodeBlock,
+                  }}
+                  className="prose prose-invert max-w-full"
+                >
+                  {response}
+                </ReactMarkdown>
+              ) : (
+                <p className="text-zinc-400 text-sm">Genie’s answer will appear here...</p>
+              )}
+            </div>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-800 text-red-200 text-sm border border-red-600 rounded-md">
+                {error}
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
+
   );
-};
-
-
+}

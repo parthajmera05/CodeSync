@@ -1,9 +1,9 @@
 "use client";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Feature1 from "../../public/img2.png";
-import Feature2 from "../../public/Screenshot 2024-12-01 015641.png";
-import Feature3 from "../../public/img3.png";
+import Feature1 from "../../public/img5.png";
+import Feature2 from "../../public/img1.png";
+import Feature3 from "../../public/img4.png";
 
 const FeaturesSection = () => {
   const features = [

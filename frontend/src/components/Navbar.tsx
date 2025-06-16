@@ -35,7 +35,7 @@ const Navbar = () => {
             type="button"
             className="text-white bg-red-600 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-4 py-2 text-center"
           >
-            <a href="/combined">Get started</a>
+            <a href="/combined">Create or Join Coding Room</a>
           </button>
           <button
             onClick={toggleMenu}

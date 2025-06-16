@@ -21,7 +21,7 @@ export default function Hero() {
       <div className="max-w-[85rem] mx-auto px-6 lg:px-8 pt-40 lg:pb-12 md:pb-12 pb-32">
         <div className="text-center">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-spacegroteskbold tracking-tight leading-tight">
-          Code Together. Create Faster.
+          Code Together. Learn Faster.
             <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500">
             All-in-one coding. Powered by AI.
