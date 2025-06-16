@@ -115,10 +115,10 @@ export default function GenieModal({ onClose, code = "" }:any)  {
 
     try {
       const AUTH_SECRET = process.env.NEXT_PUBLIC_AUTH_SECRET;
-      const CODEHIVE_GENIE_API_URL =
-        process.env.NEXT_PUBLIC_CODEHIVE_GENIE_API_URL;
+      const GENIE_API_URL =
+        process.env.NEXT_PUBLIC_GENIE_API_URL;
 
-      const response = await fetch(CODEHIVE_GENIE_API_URL!, {
+      const response = await fetch(GENIE_API_URL!, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -178,7 +178,7 @@ export default function GenieModal({ onClose, code = "" }:any)  {
             <div className="flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-blue-400" />
               <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-gray-100">
-                CodeHive Genie
+                CodeSync Genie
               </h2>
             </div>
             <button

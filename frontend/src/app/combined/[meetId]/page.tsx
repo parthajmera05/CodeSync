@@ -99,116 +99,17 @@ export default function CollaborativeIDE2({ userName }: any)  {
   const [copied, setCopied] = useState(false);
   const [isGenieModalOpen, setIsGenieModalOpen] = useState(false);
 
-  const setupVideoStream = async (
-    stream: MediaStream,
-    videoElement: HTMLVideoElement | null
-  ) => {
-    try {
-      if (!videoElement) {
-        throw new Error("Video element not found");
-      }
-      // Clear any existing stream
-      if (videoElement.srcObject) {
-        const oldStream = videoElement.srcObject as MediaStream;
-        oldStream.getTracks().forEach((track) => track.stop());
-      }
-      videoElement.srcObject = null;
-      videoElement.srcObject = stream;
-      // Ensure video tracks are enabled
-      stream.getVideoTracks().forEach((track) => {
-        track.enabled = isVideoEnabled;
-      });
-      // Ensure audio tracks are enabled
-      stream.getAudioTracks().forEach((track) => {
-        track.enabled = isAudioEnabled;
-      });
-      await videoElement.play().catch((playError) => {
-        console.error("Error playing video:", playError);
-        throw new Error("Failed to play video stream");
-      });
-      setStreamReady(true);
-      console.log("Video stream setup successfully");
-    } catch (err) {
-      console.error("Error in setupVideoStream:", err);
-      setMediaError(
-        "Failed to setup video stream. Please refresh and try again."
-      );
-      setStreamReady(false);
-    }
-  };
 
-  const initializeMediaStream = async () => {
-    try {
-      setIsInitializing(true);
-      setMediaError("");
-      console.log("Requesting media permissions...");
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 320 },
-          height: { ideal: 240 },
-          frameRate: { ideal: 15, max: 20 },
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      console.log("Media stream obtained:", stream);
-      console.log("Video tracks:", stream.getVideoTracks());
-      console.log("Audio tracks:", stream.getAudioTracks());
-      // Verify we have both audio and video tracks
-      if (stream.getVideoTracks().length === 0) {
-        throw new Error("No video track available");
-      }
-      if (stream.getAudioTracks().length === 0) {
-        throw new Error("No audio track available");
-      }
-      streamRef.current = stream;
-      setMyStream(stream);
-      await setupVideoStream(stream, userVideoRef.current);
-      setMediaError("");
-    } catch (err) {
-      console.error("Error in initializeMediaStream:", err);
-      setMediaError(
-        err instanceof Error
-          ? `Media access error: ${err.message}`
-          : "Failed to access camera and microphone. Please ensure you have granted the necessary permissions."
-      );
-      setStreamReady(false);
-    } finally {
-      setIsInitializing(false);
-    }
-  };
-
-  // Initialize media on component mount
   useEffect(() => {
-    initializeMediaStream();
+    
     // Initialize theme
     defineTheme("oceanic-next").then(() => {
       setTheme({ value: "oceanic-next", label: "Oceanic Next" });
     });
-    // Cleanup function
-    return () => {
-      if (streamRef.current) {
-        console.log("Stopping all tracks...");
-        streamRef.current.getTracks().forEach((track) => {
-          track.stop();
-          console.log(`Stopped track: ${track.kind}`);
-        });
-      }
-    };
+    
   }, []);
 
-  // Monitor video element and stream changes
-  useEffect(() => {
-    if (myStream && userVideoRef.current) {
-      console.log("Updating video element with new stream");
-      setupVideoStream(myStream, userVideoRef.current);
-    }
-  }, [myStream]);
 
-  // Socket initialization moved to room creation/joining
   const initializeSocket = () => {
     socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_BACKEND_URL, {
       transports: ["websocket"],
@@ -223,7 +124,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
       "user_joined_with_signal",
       ({ signal, callerID, userName: peerUserName }) => {
         if (streamRef.current) {
-          const peer = addPeer(signal, callerID, streamRef.current);
+          const peer = addPeer(signal, callerID);
           peersRef.current[callerID] = { peer, userName: peerUserName };
           setPeers((users) => ({
             ...users,
@@ -235,10 +136,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
     socketRef.current.on("user_left", ({ userId }) => {
       if (peersRef.current[userId]) {
         peersRef.current[userId].peer.destroy();
-        const videoElement = peersRef.current[userId].videoElement;
-        if (videoElement && videoElement.parentNode) {
-          videoElement.parentNode.removeChild(videoElement);
-        }
+        
         const newPeers = { ...peersRef.current };
         delete newPeers[userId];
         peersRef.current = newPeers;
@@ -248,12 +146,6 @@ export default function CollaborativeIDE2({ userName }: any)  {
   };
 
   const createRoom = async () => {
-    if (!streamRef.current) {
-      setMediaError(
-        "Please ensure camera and microphone access is granted before creating a room."
-      );
-      return;
-    }
     if (!name) {
       alert("Please enter your name");
       return;
@@ -298,7 +190,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
             const peer = createPeer(
               userId,
               socketRef.current?.id || "",
-              streamRef.current
+              
             );
             peersRef.current[userId] = { peer, userName: peerUserName };
             setPeers((currentPeers) => ({
@@ -317,7 +209,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
       );
       setIsJoined(true);
       setRoomId(roomIdToJoin);
-      await initializeMediaStream();
+      
     } catch (err) {
       console.error("Error joining room:", err);
       setMediaError("Failed to join room. Please try again.");
@@ -327,12 +219,11 @@ export default function CollaborativeIDE2({ userName }: any)  {
   const createPeer = (
     userToSignal: string,
     callerID: string,
-    stream: MediaStream
+    
   ) => {
     const peer = new Peer({
       initiator: true,
       trickle: false,
-      stream,
       config: {
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
@@ -348,22 +239,19 @@ export default function CollaborativeIDE2({ userName }: any)  {
       });
     });
     // Listen for stream events to add video of other peers
-    peer.on("stream", (remoteStream) => {
-      // Function to attach the remote stream to a video element
-      addVideoStream(remoteStream, userToSignal);
-    });
+    
     return peer;
   };
 
   const addPeer = (
     incomingSignal: Peer.SignalData,
     callerID: string,
-    stream: MediaStream
+    
   ) => {
     const peer = new Peer({
       initiator: false,
       trickle: false,
-      stream,
+      
       config: {
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
@@ -374,36 +262,12 @@ export default function CollaborativeIDE2({ userName }: any)  {
     peer.on("signal", (signal) => {
       socketRef.current?.emit("returning_signal", { signal, callerID });
     });
-    peer.on("stream", (remoteStream) => {
-      addVideoStream(remoteStream, callerID);
-    });
+    
     peer.signal(incomingSignal);
     return peer;
   };
 
-  const addVideoStream = (stream: any, userId: any) => {
-    const videoElement = document.createElement("video");
-    videoElement.srcObject = stream;
-    videoElement.autoplay = true;
-    videoElement.playsInline = true;
-    videoElement.classList.add(
-      "peer-video",
-      "rounded-lg",
-      // "aspect-video",
-      "bg-gray-800",
-      "overflow-hidden",
-      // "scroll-container",
-      "w-full"
-      // "object-cover"
-    );
-    const videoContainer = document.getElementById("video-container");
-    if (videoContainer) {
-      videoContainer.appendChild(videoElement);
-    }
-    // Store the reference if needed for cleanup later
-    peersRef.current[userId].videoElement = videoElement;
-  };
-
+  
   // Code Editor Functions
   const handleThemeChange = (
     selectedOption: { label: string; value: string } | null
@@ -412,7 +276,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
       if (["light", "vs-dark"].includes(selectedOption.value)) {
         setTheme(selectedOption);
       } else {
-        defineTheme(selectedOption.value).then(() => setTheme(selectedOption));
+        defineTheme(selectedOption.value as any).then(() => setTheme(selectedOption));
       }
     }
   };
@@ -496,20 +360,16 @@ export default function CollaborativeIDE2({ userName }: any)  {
   };
 
   const leaveRoom = () => {
-    Object.values(peersRef.current).forEach(({ peer, videoElement }) => {
+    Object.values(peersRef.current).forEach(({ peer }) => {
       peer.destroy();
-      if (videoElement && videoElement.parentNode) {
-        videoElement.parentNode.removeChild(videoElement);
-      }
+      
     });
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
+   
     socketRef.current?.disconnect();
     setIsJoined(false);
     setPeers({});
     setRoomId("");
-    setMyStream(null);
+    
     setMediaError("");
     window.location.reload();
   };
@@ -550,42 +410,12 @@ export default function CollaborativeIDE2({ userName }: any)  {
 
   return (
     <div className="min-h-screen bg-gray-900">
-      {isInitializing ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-white">
-            Initializing camera and microphone...
-          </div>
-        </div>
-      ) : !isJoined ? (
+      {!isJoined ? (
         <div className="flex flex-col items-center justify-center min-h-screen gap-4 p-4">
-          {mediaError && (
-            <div className="bg-red-500 text-white p-4 rounded-lg mb-4">
-              {mediaError}
-              <button
-                onClick={initializeMediaStream}
-                className="ml-4 bg-white text-red-500 px-3 py-1 rounded hover:bg-gray-100"
-              >
-                Retry
-              </button>
-            </div>
-          )}
-          <div className="relative w-64 aspect-video bg-gray-800 rounded-lg overflow-hidden mb-4">
-            <video
-              ref={userVideoRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-white">
-              Preview
-            </div>
-            {!streamReady && !mediaError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                <div className="text-white text-center">Loading video...</div>
-              </div>
-            )}
-          </div>
+          
+         
+            
+          
           <div className="space-y-4 w-[90vw] lg:w-fit md:w-fit">
             <div className="flex flex-col gap-2">
               <input
@@ -597,7 +427,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
               />
               <button
                 onClick={createRoom}
-                disabled={!streamReady}
+                
                 className="w-full bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Create New Room
@@ -612,8 +442,8 @@ export default function CollaborativeIDE2({ userName }: any)  {
                 className="border p-2 rounded-lg"
               />
               <button
-                onClick={() => joinRoomClicked(roomId)}
-                disabled={!streamReady}
+                onClick={() => joinRoomClicked(roomId as string)}
+                
                 className="bg-green-500 text-white w-full px-6 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Join Room
@@ -640,7 +470,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
               </div>
               <div className="flex gap-2">
                 <span
-                  onClick={() => copyToClipboard(roomId, setCopied)}
+                  onClick={() => copyToClipboard(roomId as string, setCopied)}
                   className={`ml-2 p-2 rounded-full cursor-pointer transition ${
                     copied ? "bg-green-500" : "bg-blue-500 hover:bg-blue-600"
                   }`}
@@ -653,7 +483,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
                   )}
                 </span>
                 <span
-                  onClick={() => copyMeetLink(roomId, setMeetLinkCopied)}
+                  onClick={() => copyMeetLink(roomId as string, setMeetLinkCopied)}
                   className={`ml-2 p-2 rounded-full cursor-pointer transition ${
                     meetlinkcopied
                       ? "bg-green-500"
@@ -671,22 +501,6 @@ export default function CollaborativeIDE2({ userName }: any)  {
             </div>
 
             <div className="hidden lg:flex gap-2">
-              <button
-                onClick={toggleVideo}
-                className={`px-4 py-2 rounded-lg ${
-                  isVideoEnabled ? "bg-blue-500" : "bg-red-500"
-                } text-white`}
-              >
-                {isVideoEnabled ? "Turn Off Video" : "Turn On Video"}
-              </button>
-              <button
-                onClick={toggleAudio}
-                className={`px-4 py-2 rounded-lg ${
-                  isAudioEnabled ? "bg-blue-500" : "bg-red-500"
-                } text-white`}
-              >
-                {isAudioEnabled ? "Turn Off Audio" : "Turn On Audio"}
-              </button>
               <button
                 onClick={leaveRoom}
                 className="px-4 py-2 rounded-lg bg-red-500 text-white"
@@ -711,22 +525,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
               </button>
             </div>
             <div className="flex items-center justify-center mt-2 lg:hidden gap-2">
-              <button
-                onClick={toggleVideo}
-                className={`px-4 py-2 rounded-lg ${
-                  isVideoEnabled ? "bg-blue-500" : "bg-red-500"
-                } text-white`}
-              >
-                {isVideoEnabled ? <FaVideoSlash /> : <FaVideo />}
-              </button>
-              <button
-                onClick={toggleAudio}
-                className={`px-4 py-2 rounded-lg ${
-                  isAudioEnabled ? "bg-blue-500" : "bg-red-500"
-                } text-white`}
-              >
-                {isAudioEnabled ? <FaMicrophoneSlash /> : <FaMicrophone />}
-              </button>
+              
               <button
                 onClick={leaveRoom}
                 className="px-4 py-2 rounded-lg bg-red-500 text-white"
@@ -756,33 +555,7 @@ export default function CollaborativeIDE2({ userName }: any)  {
             {/* Left side - Videos */}
             <div className="w-full lg:w-1/4 flex flex-col gap-2">
               {/* Self video */}
-              <div className="relative w-full">
-                <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden scroll-container">
-                  <video
-                    ref={userVideoRef}
-                    autoPlay
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 px-2 py-1 rounded text-white">
-                    You
-                  </div>
-                </div>
-              </div>
-              {/* Container for peer videos */}
-              <div
-                id="video-container"
-                className="w-full lg:block lg:h-[80vh] lg:overflow-x-hidden scroll-container"
-              >
-                {Object.entries(peers).map(
-                  ([peerId, { peer, userName: peerUserName }]) => (
-                    <div key={peerId} className="lg:relative mt-4 lg:w-full">
-                      {/* <PeerVideo peer={peer} userName={peerUserName} /> */}
-                    </div>
-                  )
-                )}
-              </div>
+              
             </div>
             {/* Right side - Code Editor */}
             <div className="w-full lg:w-3/4 space-y-4">

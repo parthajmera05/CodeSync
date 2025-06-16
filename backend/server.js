@@ -44,8 +44,8 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     rooms[roomId].users[socket.id] = {
       userName,
-      videoEnabled: true,
-      audioEnabled: true,
+      // videoEnabled: true,
+      // audioEnabled: true,
       code: rooms[roomId].code || "",
       cursorPosition: null,
     };
@@ -118,25 +118,9 @@ io.on("connection", (socket) => {
       id: socket.id,
     });
   });
-  socket.on("toggle_video", ({ roomId, enabled }) => {
-    if (rooms[roomId]?.users[socket.id]) {
-      rooms[roomId].users[socket.id].videoEnabled = enabled;
-      socket.to(roomId).emit("user_toggled_video", {
-        userId: socket.id,
-        enabled,
-      });
-    }
-  });
 
-  socket.on("toggle_audio", ({ roomId, enabled }) => {
-    if (rooms[roomId]?.users[socket.id]) {
-      rooms[roomId].users[socket.id].audioEnabled = enabled;
-      socket.to(roomId).emit("user_toggled_audio", {
-        userId: socket.id,
-        enabled,
-      });
-    }
-  });
+
+  
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
 
