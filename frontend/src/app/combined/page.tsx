@@ -156,10 +156,7 @@ export default function CollaborativeIDE({ userName }: any) {
       alert("Please enter your name");
       return;
     }
-    if(!roomId){
-      alert("Please enter room id");
-      return;
-    }
+    
     try {
       if (!socketRef.current) {
         initializeSocket();
