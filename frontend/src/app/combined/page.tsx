@@ -188,7 +188,7 @@ export default function CollaborativeIDE({ userName }: any) {
       );
       socketRef.current?.once("room_not_found", () => {
         alert("Room not found");
-        socketRef.current?.disconnect(); 
+        leaveRoom();
         
       });
       socketRef.current?.on(
