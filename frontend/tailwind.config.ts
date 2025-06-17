@@ -21,6 +21,19 @@ const config: Config = {
       },
     },
   },
+  animation: {
+    gradientGlow: "gradientGlow 20s ease-in-out infinite",
+  },
+  keyframes: {
+    gradientGlow: {
+      "0%, 100%": {
+        backgroundPosition: "0% 50%",
+      },
+      "50%": {
+        backgroundPosition: "100% 50%",
+      },
+    },
+  },
   plugins: [],
 };
 export default config;

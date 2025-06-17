@@ -8,7 +8,7 @@ import Feature3 from "../../public/img4.png";
 const FeaturesSection = () => {
   const features = [
     {
-      icon: "🌐",
+    
       title: "Real-Time Collaborative Coding",
       description:
         "Work together on code with live updates across multiple languages. With 20+ themes to choose from, every coder feels at home.",
@@ -16,7 +16,7 @@ const FeaturesSection = () => {
       color: "bg-black",
     },
     {
-      icon: "💬",
+      
       title: "Built-in Communication",
       description:
         "Integrated chat and video calls keep your team in sync. Share styled code snippets or download files effortlessly.",
@@ -24,7 +24,7 @@ const FeaturesSection = () => {
       color: "bg-black",
     },
     {
-      icon: "⚡",
+      
       title: "Smart AI Coding Assistant",
       description:
         "Genie helps you code smarter with intelligent suggestions, auto-fixes, and instant help when you need it most.",
@@ -60,7 +60,7 @@ const FeaturesSection = () => {
 
   return (
     <motion.div
-      className="container lg:w-[80vw] mx-auto px-4 lg:py-12 md:py-10 py-6 font-spacegroteskmedium"
+      className="container lg:w-[80vw] mx-auto px-4 lg:py-8 md:py-8 py-6 font-spacegroteskmedium"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.2 }}
@@ -78,9 +78,7 @@ const FeaturesSection = () => {
             className="md:w-1/2 p-8"
             variants={itemVariants(index % 2 === 0)}
           >
-            <div className="text-5xl mb-4 text-center md:text-start">
-              {feature.icon}
-            </div>
+            
             <h2 className="lg:text-3xl text-xl font-bold font-spacegroteskregular mb-4 text-center md:text-start bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-orange-500">
               {feature.title}
             </h2>

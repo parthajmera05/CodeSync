@@ -156,6 +156,10 @@ export default function CollaborativeIDE({ userName }: any) {
       alert("Please enter your name");
       return;
     }
+    if(!roomId){
+      alert("Please enter room id");
+      return;
+    }
     try {
       if (!socketRef.current) {
         initializeSocket();
@@ -182,6 +186,11 @@ export default function CollaborativeIDE({ userName }: any) {
           
         }
       );
+      socketRef.current?.once("room_not_found", () => {
+        alert("Room not found");
+        socketRef.current?.disconnect(); 
+        
+      });
       socketRef.current?.on(
         "receive_code_change",
         ({ code, cursorPosition }) => {
@@ -581,7 +590,7 @@ export default function CollaborativeIDE({ userName }: any) {
                   </div>
                   <button
                     onClick={toggleGenieModal}
-                    className="px-4 w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    className="px-4 w-full py-2 bg-orange-500 text-white rounded-lg hover:bg-red-600"
                   >
                     Generate Code with AI
                   </button>

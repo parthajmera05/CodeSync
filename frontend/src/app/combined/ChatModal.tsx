@@ -58,7 +58,7 @@ export default function ChatModal({
         <div className="fixed bottom-4 right-4 z-50 lg:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="p-3 bg-blue-600 rounded-full hover:bg-blue-700 shadow-xl transition-all"
+            className="p-3 bg-orange-600 rounded-full hover:bg-red-700 shadow-xl transition-all"
           >
             {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
           </button>
